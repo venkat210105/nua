@@ -1,0 +1,69 @@
+.star-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.stars {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+}
+
+.star {
+  color: var(--gray-300);
+  transition: color var(--transition-fast);
+  line-height: 1;
+}
+
+/* Filled star with rose-gold tone */
+.star.filled {
+  color: var(--rose-gold);
+  text-shadow: 0 0 4px rgba(233, 140, 166, 0.4); /* subtle glow */
+}
+
+.star.half {
+  color: var(--rose-gold);
+  position: relative;
+}
+
+.star.half::before {
+  content: '★';
+  position: absolute;
+  left: 0;
+  width: 50%;
+  overflow: hidden;
+  color: var(--rose-gold);
+}
+
+.star.empty {
+  color: var(--gray-300);
+}
+
+/* Size variants */
+.star-rating.normal .star {
+  font-size: 0.875rem;
+}
+
+.star-rating.large .star {
+  font-size: 1.125rem;
+}
+
+.star-rating.small .star {
+  font-size: 0.75rem;
+}
+
+.rating-value {
+  font-size: 0.875rem;
+  color: var(--gray-600);
+  margin-left: 0.5rem;
+  white-space: nowrap;
+}
+
+.star-rating.large .rating-value {
+  font-size: 1rem;
+}
+
+.star-rating.small .rating-value {
+  font-size: 0.75rem;
+}

@@ -217,9 +217,9 @@
 ========================= */
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 2.5rem;
-  margin-bottom: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 0.25rem;
+  margin-bottom: 1rem;
 }
 
 .product-card {
@@ -295,9 +295,10 @@
    Features Section
 ========================= */
 .features-section {
+  
   margin-top: 4rem;
   padding: 3rem 0;
-  background: var(--secondary-lavender);
+  background: var(--primary-pink);
   border-radius: var(--radius-xl);
 }
 

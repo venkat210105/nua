@@ -7,58 +7,58 @@ import './NavigationHeader.css';
 
 const NavigationHeader = () => {
   const navigate = useNavigate();
-  const { getItemCount } = useCart();
-  const { searchProducts } = useProducts();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isSearching, setIsSearching] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const searchInputRef = useRef(null);
+  const { getItemCount } = useCart(); // Access cart item count from context
+  const { searchProducts } = useProducts(); // Access product search function from context
 
-  // Debounced search function
-  // Debounced search function
-const debouncedSearch = useCallback(
-  debounce(async (query) => {
-    if (query.trim()) {
-      setIsSearching(true);
-      try {
-        await searchProducts(query);
-        navigate('/');
-      } catch (error) {
-        console.error('Search failed:', error);
-      } finally {
-        setIsSearching(false);
+  const [searchQuery, setSearchQuery] = useState(''); // Controlled input for search
+  const [isSearching, setIsSearching] = useState(false); // Loading indicator for search
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // Mobile menu toggle state
+  const searchInputRef = useRef(null); // Reference to the search input element
+
+  // Debounced search function to reduce API calls while typing
+  const debouncedSearch = useCallback(
+    debounce(async (query) => {
+      if (query.trim()) {
+        setIsSearching(true);
+        try {
+          await searchProducts(query); // Perform search
+          navigate('/'); // Navigate to home page to display results
+        } catch (error) {
+          console.error('Search failed:', error);
+        } finally {
+          setIsSearching(false);
+        }
+      } else {
+        // Reset to all products if query is empty
+        try {
+          await searchProducts(''); 
+          navigate('/');
+        } catch (error) {
+          console.error('Reset search failed:', error);
+        }
       }
-    } else {
-      // Reset to all products if query is empty
-      try {
-        await searchProducts(''); // or fetchAllProducts() if you have that
-        navigate('/');
-      } catch (error) {
-        console.error('Reset search failed:', error);
-      }
-    }
-  }, 300),
-  [searchProducts, navigate]
-);
+    }, 300),
+    [searchProducts, navigate]
+  );
 
-
-
-
+  // Handle input changes in search bar
   const handleSearchChange = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
-    debouncedSearch(query);
+    debouncedSearch(query); // Trigger debounced search
   };
 
+  // Handle search form submit
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       searchProducts(searchQuery);
       navigate('/');
-      searchInputRef.current?.blur();
+      searchInputRef.current?.blur(); // Remove focus from input after submit
     }
   };
 
+  // Toggle mobile menu open/close
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
@@ -77,7 +77,7 @@ const debouncedSearch = useCallback(
     };
   }, [isMobileMenuOpen]);
 
-  const cartItemCount = getItemCount();
+  const cartItemCount = getItemCount(); // Total items in cart
 
   return (
     <header className="navigation-header">

@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import Slider from "react-slick";
-import { useProducts } from '../context/ProductContext';
+import Slider from "react-slick"; // Carousel component for featured products
+import { useProducts } from '../context/ProductContext'; // Custom hook to access product state and actions
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import ErrorMessage from '../components/common/ErrorMessage';
-import { formatCategoryName } from '../utils/helpers';
+import { formatCategoryName } from '../utils/helpers'; // Helper to format category names nicely
 import { useNavigate } from 'react-router-dom';
 import './HomePage.css';
 import ProductCard from '../components/common/ProductCard';
 
-
+// HomePage component displays featured products, product grid, filters, sort options, and site features
 const HomePage = () => {
   const {
     products,
@@ -23,36 +23,42 @@ const HomePage = () => {
     filterByCategory,
     sortProducts,
     clearError
-  } = useProducts();
+  } = useProducts(); // Extract product state and actions from context
 
-  const [sortBy, setSortBy] = useState('default');
-  const navigate = useNavigate();
+  const [sortBy, setSortBy] = useState('default'); // State to store current sorting option
+  const navigate = useNavigate(); // Hook to programmatically navigate to product details
 
+  // Load products and categories when the page first renders
   useEffect(() => {
     if (products.length === 0) loadProducts();
     if (categories.length === 0) loadCategories();
   }, [products.length, categories.length, loadProducts, loadCategories]);
 
+  // Handle category selection changes
   const handleCategoryChange = (e) => {
-    clearError();
-    filterByCategory(e.target.value);
+    clearError(); // Clear any previous errors
+    filterByCategory(e.target.value); // Filter products based on selected category
   };
 
+  // Handle sort option changes
   const handleSortChange = (e) => {
     const sortValue = e.target.value;
     setSortBy(sortValue);
-    sortProducts(sortValue);
+    sortProducts(sortValue); // Apply sorting
   };
 
+  // Reset filters and sorting to default
   const handleClearFilters = () => {
     filterByCategory('all');
     setSortBy('default');
   };
 
+  // Navigate to product details page on click
   const handleProductClick = (id) => {
     navigate(`/product/${id}`);
   };
 
+  // Settings for the featured products carousel
   const carouselSettings = {
     dots: true,
     infinite: true,
@@ -69,6 +75,7 @@ const HomePage = () => {
     ],
   };
 
+  // Show loading spinner if products are being fetched and none are available yet
   if (loading && products.length === 0) {
     return (
       <div className="page-container">
@@ -77,6 +84,7 @@ const HomePage = () => {
     );
   }
 
+  // Show error message if fetching products failed and no products are available
   if (error && products.length === 0) {
     return (
       <div className="page-container">
@@ -84,7 +92,7 @@ const HomePage = () => {
           message={error}
           onRetry={() => {
             clearError();
-            loadProducts();
+            loadProducts(); // Retry loading products
           }}
         />
       </div>
@@ -94,7 +102,8 @@ const HomePage = () => {
   return (
     <div className="homepage">
       <div className="container">
-        {/* Page Header */}
+
+        {/* Page Header with title, subtitle, and search results info */}
         <div className="page-header">
           <h1 className="page-title">Discover Amazing Products</h1>
           <p className="page-subtitle">
@@ -107,7 +116,7 @@ const HomePage = () => {
           )}
         </div>
 
-        {/* Carousel Section */}
+        {/* Carousel Section for featured products */}
         <div className="product-carousel-section">
           <h2 className="carousel-title">Featured Products</h2>
           {loading && products.length === 0 ? (
@@ -132,9 +141,10 @@ const HomePage = () => {
           )}
         </div>
 
-        {/* Filters and Sort */}
+        {/* Filters and Sorting Section */}
         <div className="filters-section">
           <div className="filter-controls">
+            {/* Category Filter */}
             <div className="filter-group">
               <label htmlFor="category-filter">Category:</label>
               <select
@@ -152,6 +162,7 @@ const HomePage = () => {
               </select>
             </div>
 
+            {/* Sorting Filter */}
             <div className="filter-group">
               <label htmlFor="sort-filter">Sort by:</label>
               <select
@@ -170,6 +181,7 @@ const HomePage = () => {
             </div>
           </div>
 
+          {/* Display filtered results info */}
           <div className="results-info">
             <span className="results-count">
               {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} found
@@ -184,6 +196,7 @@ const HomePage = () => {
 
         {/* Products Grid */}
         {filteredProducts.length === 0 && !loading ? (
+          // Show "No products found" message if there are no matching products
           <div className="no-products">
             <div className="no-products-icon">🔍</div>
             <h3>No products found</h3>
@@ -200,6 +213,7 @@ const HomePage = () => {
           </div>
         ) : (
           <>
+            {/* Display products in a responsive grid */}
             <div className="products-grid">
               {filteredProducts.map(product => (
                 <div key={product.id}>
@@ -208,6 +222,7 @@ const HomePage = () => {
               ))}
             </div>
 
+            {/* Show a small loading spinner when more products are being fetched */}
             {loading && products.length > 0 && (
               <div className="loading-more">
                 <LoadingSpinner size="small" message="Loading more products..." />
@@ -216,7 +231,7 @@ const HomePage = () => {
           </>
         )}
 
-        {/* Features Section */}
+        {/* Features Section highlighting store benefits */}
         <div className="features-section">
           <div className="features-grid">
             <div className="feature-card">
@@ -241,6 +256,7 @@ const HomePage = () => {
             </div>
           </div>
         </div>
+
       </div>
     </div>
   );

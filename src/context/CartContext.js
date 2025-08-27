@@ -1,13 +1,17 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { calculateDiscountedPrice, calculateGST } from '../utils/helpers';
 
+// Create a context for the cart
 const CartContext = createContext();
 
+// Reducer to manage cart state actions
 const cartReducer = (state, action) => {
   switch (action.type) {
     case 'ADD_TO_CART':
+      // Check if item already exists in cart
       const existingItem = state.items.find(item => item.id === action.product.id);
       if (existingItem) {
+        // If exists, update quantity
         return {
           ...state,
           items: state.items.map(item =>
@@ -17,24 +21,28 @@ const cartReducer = (state, action) => {
           )
         };
       }
+      // If new, add item to cart
       return {
         ...state,
         items: [...state.items, { ...action.product, quantity: action.quantity }]
       };
 
     case 'REMOVE_FROM_CART':
+      // Remove item by ID
       return {
         ...state,
         items: state.items.filter(item => item.id !== action.productId)
       };
 
     case 'UPDATE_QUANTITY':
+      // Remove item if quantity <= 0
       if (action.quantity <= 0) {
         return {
           ...state,
           items: state.items.filter(item => item.id !== action.productId)
         };
       }
+      // Update item quantity
       return {
         ...state,
         items: state.items.map(item =>
@@ -45,26 +53,22 @@ const cartReducer = (state, action) => {
       };
 
     case 'CLEAR_CART':
-      return {
-        ...state,
-        items: []
-      };
+      // Clear all items from cart
+      return { ...state, items: [] };
 
     case 'LOAD_CART':
-      return {
-        ...state,
-        items: action.items || []
-      };
+      // Load cart items from localStorage
+      return { ...state, items: action.items || [] };
 
     default:
       return state;
   }
 };
 
-const initialState = {
-  items: []
-};
+// Initial cart state
+const initialState = { items: [] };
 
+// CartProvider component wrapping the app
 export const CartProvider = ({ children }) => {
   const [state, dispatch] = useReducer(cartReducer, initialState);
 
@@ -81,15 +85,15 @@ export const CartProvider = ({ children }) => {
     }
   }, []);
 
-  // Save cart to localStorage whenever it changes
+  // Persist cart to localStorage whenever items change
   useEffect(() => {
     localStorage.setItem('shophub_react_cart', JSON.stringify(state.items));
   }, [state.items]);
 
+  // Add item to cart with stock validation
   const addToCart = (product, quantity = 1) => {
     if (!product || quantity <= 0) return;
 
-    // Check stock availability
     const existingItem = state.items.find(item => item.id === product.id);
     const currentQuantity = existingItem ? existingItem.quantity : 0;
     const totalQuantity = currentQuantity + quantity;
@@ -103,54 +107,46 @@ export const CartProvider = ({ children }) => {
     return true;
   };
 
-  const removeFromCart = (productId) => {
-    dispatch({ type: 'REMOVE_FROM_CART', productId });
-  };
+  // Remove item by productId
+  const removeFromCart = (productId) => dispatch({ type: 'REMOVE_FROM_CART', productId });
 
+  // Update item quantity
   const updateQuantity = (productId, quantity) => {
     if (quantity < 0) return;
     dispatch({ type: 'UPDATE_QUANTITY', productId, quantity });
   };
 
-  const clearCart = () => {
-    dispatch({ type: 'CLEAR_CART' });
-  };
+  // Clear entire cart
+  const clearCart = () => dispatch({ type: 'CLEAR_CART' });
 
-  const getCartTotal = () => {
-    return state.items.reduce((total, item) => {
-      const priceInINR = calculateDiscountedPrice(item.price, item.discountPercentage);
-      return total + (priceInINR * item.quantity);
-    }, 0);
-  };
+  // Calculate total cart value (INR)
+  const getCartTotal = () => state.items.reduce((total, item) => {
+    const priceInINR = calculateDiscountedPrice(item.price, item.discountPercentage);
+    return total + (priceInINR * item.quantity);
+  }, 0);
 
-  const getItemCount = () => {
-    return state.items.reduce((total, item) => total + item.quantity, 0);
-  };
+  // Total number of items in cart
+  const getItemCount = () => state.items.reduce((total, item) => total + item.quantity, 0);
 
-  const getCartSubtotal = () => {
-    return getCartTotal();
-  };
+  // Subtotal before GST
+  const getCartSubtotal = () => getCartTotal();
 
-  const getCartGST = () => {
-    const subtotal = getCartSubtotal();
-    return calculateGST(subtotal);
-  };
+  // Calculate GST (default 18%)
+  const getCartGST = () => calculateGST(getCartSubtotal());
 
-  const getCartGrandTotal = () => {
-    const subtotal = getCartSubtotal();
-    const gst = getCartGST();
-    return subtotal + gst;
-  };
+  // Calculate grand total including GST
+  const getCartGrandTotal = () => getCartSubtotal() + getCartGST();
 
-  const isInCart = (productId) => {
-    return state.items.some(item => item.id === productId);
-  };
+  // Check if a product is already in cart
+  const isInCart = (productId) => state.items.some(item => item.id === productId);
 
+  // Get quantity of a specific cart item
   const getCartItemQuantity = (productId) => {
     const item = state.items.find(item => item.id === productId);
     return item ? item.quantity : 0;
   };
 
+  // Context value exposing cart functions and state
   const value = {
     cartItems: state.items,
     addToCart,
@@ -173,6 +169,7 @@ export const CartProvider = ({ children }) => {
   );
 };
 
+// Custom hook for consuming cart context
 export const useCart = () => {
   const context = useContext(CartContext);
   if (!context) {

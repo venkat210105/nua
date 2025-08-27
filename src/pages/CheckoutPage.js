@@ -4,10 +4,12 @@ import { useCart } from '../context/CartContext';
 import { validateEmail, validatePinCode, generateOrderNumber } from '../utils/helpers';
 import './CheckoutPage.css';
 
+// CheckoutPage component handles the entire checkout process including form input, validation, order summary, and order confirmation
 const CheckoutPage = () => {
-  const navigate = useNavigate();
-  const { cartItems, getItemCount, clearCart } = useCart();
+  const navigate = useNavigate(); // Hook to programmatically navigate between routes
+  const { cartItems, getItemCount, clearCart } = useCart(); // Get cart data and actions from context
 
+  // State to store all form input values
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -18,12 +20,16 @@ const CheckoutPage = () => {
     pinCode: ''
   });
 
+  // State to store errors for each form field
   const [formErrors, setFormErrors] = useState({});
+  // State to indicate whether the form submission is in progress
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // State to track if the order has been successfully placed
   const [orderPlaced, setOrderPlaced] = useState(false);
+  // State to store generated order number
   const [orderNumber, setOrderNumber] = useState('');
 
-  // Store totals for order confirmation
+  // State to store computed totals for order confirmation
   const [totals, setTotals] = useState({
     subtotal: 0,
     gst: 0,
@@ -31,11 +37,12 @@ const CheckoutPage = () => {
     finalTotal: 0
   });
 
-  // Redirect if cart is empty
+  // Redirect the user to the cart page if there are no items to checkout
   useEffect(() => {
     if (cartItems.length === 0 && !orderPlaced) navigate('/cart');
   }, [cartItems.length, navigate, orderPlaced]);
 
+  // Function to validate a single field based on its name and value
   const validateField = (name, value) => {
     switch (name) {
       case 'fullName': return value.trim().length < 2 ? 'Full name must be at least 2 characters' : '';
@@ -49,8 +56,10 @@ const CheckoutPage = () => {
     }
   };
 
+  // Handle changes to form inputs
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    // Clean phone and pin code inputs to only allow numbers and limit length
     if (name === 'phone') {
       const cleaned = value.replace(/\D/g, '').slice(0, 10);
       setFormData(prev => ({ ...prev, [name]: cleaned }));
@@ -60,15 +69,18 @@ const CheckoutPage = () => {
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
+    // Clear error for the field as user types
     if (formErrors[name]) setFormErrors(prev => ({ ...prev, [name]: '' }));
   };
 
+  // Handle blur event to validate fields when user leaves the input
   const handleInputBlur = (e) => {
     const { name, value } = e.target;
     const error = validateField(name, value);
     if (error) setFormErrors(prev => ({ ...prev, [name]: error }));
   };
 
+  // Validate all form fields before submission
   const validateForm = () => {
     const errors = Object.keys(formData).reduce((acc, key) => {
       const error = validateField(key, formData[key]);
@@ -76,38 +88,41 @@ const CheckoutPage = () => {
       return acc;
     }, {});
     setFormErrors(errors);
-    return Object.keys(errors).length === 0;
+    return Object.keys(errors).length === 0; // Return true if no errors
   };
 
-  // Compute totals
+  // Function to calculate subtotal, GST, shipping, and final total
   const computeTotals = (items) => {
     const itemTotals = items.map(item => {
+      // Convert USD price to INR and apply discount if any
       const priceINR = parseFloat(item.price) * 83.12 * (1 - (item.discountPercentage || 0) / 100);
       return priceINR * item.quantity;
     });
     const subtotal = itemTotals.reduce((sum, val) => sum + val, 0);
-    const gst = subtotal * 0.18;
-    const shippingCost = subtotal >= 999 ? 0 : 99;
+    const gst = subtotal * 0.18; // 18% GST
+    const shippingCost = subtotal >= 999 ? 0 : 99; // Free shipping for orders above 999
     const finalTotal = subtotal + gst + shippingCost;
     return { subtotal, gst, shippingCost, finalTotal };
   };
 
+  // Handle form submission for placing an order
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateForm()) return;
+    if (!validateForm()) return; // Stop if validation fails
 
     setIsSubmitting(true);
     try {
-      // Calculate totals before clearing cart
+      // Calculate totals before clearing the cart
       const calculatedTotals = computeTotals(cartItems);
       setTotals(calculatedTotals);
 
+      // Simulate a network delay for order processing
       await new Promise(resolve => setTimeout(resolve, 2500));
-      const orderNum = generateOrderNumber();
+      const orderNum = generateOrderNumber(); // Generate a unique order number
       setOrderNumber(orderNum);
 
-      clearCart();
-      setOrderPlaced(true);
+      clearCart(); // Clear cart after successful order
+      setOrderPlaced(true); // Show order confirmation
     } catch (error) {
       console.error('Order processing failed:', error);
       alert('Order processing failed. Please try again.');
@@ -116,6 +131,7 @@ const CheckoutPage = () => {
     }
   };
 
+  // List of Indian states for dropdown selection
   const indianStates = [
     'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Goa', 'Gujarat',
     'Haryana', 'Himachal Pradesh', 'Jammu and Kashmir', 'Jharkhand', 'Karnataka', 'Kerala',
@@ -124,14 +140,16 @@ const CheckoutPage = () => {
     'Uttarakhand', 'West Bengal', 'Delhi'
   ];
 
+  // Helper to format amounts as Indian currency
   const formatCurrency = (amount) =>
     new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
 
-  // Use stored totals if order placed, else compute live
+  // Use stored totals if order is placed, else compute totals live from cart
   const { subtotal, gst, shippingCost, finalTotal } = orderPlaced
     ? totals
     : computeTotals(cartItems);
 
+  // Render order confirmation page if order is placed
   if (orderPlaced) {
     return (
       <div className="checkout-page">
@@ -164,16 +182,19 @@ const CheckoutPage = () => {
     );
   }
 
+  // Render checkout form if order is not yet placed
   return (
     <div className="checkout-page">
       <div className="container">
         <h1 className="page-title">Checkout</h1>
 
         <div className="checkout-content">
+          {/* Checkout Form Section */}
           <div className="checkout-form-section">
             <h2>Shipping Information</h2>
             <form onSubmit={handleSubmit} className="checkout-form">
-              {/* Full Name */}
+              
+              {/* Full Name Input */}
               <div className="form-group">
                 <label htmlFor="fullName">Full Name *</label>
                 <input
@@ -189,7 +210,7 @@ const CheckoutPage = () => {
                 {formErrors.fullName && <span className="error-message">{formErrors.fullName}</span>}
               </div>
 
-              {/* Email and Phone */}
+              {/* Email and Mobile Inputs */}
               <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="email">Email Address *</label>
@@ -227,7 +248,7 @@ const CheckoutPage = () => {
                 </div>
               </div>
 
-              {/* Address */}
+              {/* Address Input */}
               <div className="form-group">
                 <label htmlFor="address">Street Address *</label>
                 <input
@@ -244,7 +265,7 @@ const CheckoutPage = () => {
                 {formErrors.address && <span className="error-message">{formErrors.address}</span>}
               </div>
 
-              {/* City, State, Pin */}
+              {/* City, State, PIN Code */}
               <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="city">City *</label>
@@ -296,6 +317,7 @@ const CheckoutPage = () => {
                 </div>
               </div>
 
+              {/* Submit Button */}
               <button
                 type="submit"
                 className={`place-order-btn ${isSubmitting ? 'loading' : ''}`}
@@ -306,7 +328,7 @@ const CheckoutPage = () => {
             </form>
           </div>
 
-          {/* Order Summary */}
+          {/* Order Summary Section */}
           <div className="order-summary-section">
             <div className="order-summary">
               <h3>Order Summary</h3>
@@ -327,6 +349,7 @@ const CheckoutPage = () => {
                 })}
               </div>
 
+              {/* Display subtotal, GST, shipping, and grand total */}
               <div className="order-totals">
                 <div className="total-line">
                   <span>Subtotal ({getItemCount()} item{getItemCount() !== 1 ? 's' : ''})</span>

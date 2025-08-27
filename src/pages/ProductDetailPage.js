@@ -8,19 +8,24 @@ import ErrorMessage from '../components/common/ErrorMessage';
 import { formatPrice, calculateDiscountedPrice, getStockStatus, formatCategoryName } from '../utils/helpers';
 import './ProductDetailPage.css';
 
+// ProductDetailPage displays the details of a single product
 const ProductDetailPage = () => {
-  const { id } = useParams();
+  const { id } = useParams(); // Get product ID from URL
   const navigate = useNavigate();
-  const { currentProduct, loading, error, loadProductById } = useProducts();
-  const { addToCart, isInCart, getCartItemQuantity } = useCart();
-  const [quantity, setQuantity] = useState(1);
-  const [selectedImage, setSelectedImage] = useState(0);
-  const [addingToCart, setAddingToCart] = useState(false);
 
+  const { currentProduct, loading, error, loadProductById } = useProducts(); // Product context
+  const { addToCart, isInCart, getCartItemQuantity } = useCart(); // Cart context
+
+  const [quantity, setQuantity] = useState(1); // Selected quantity for adding to cart
+  const [selectedImage, setSelectedImage] = useState(0); // Index of main image shown
+  const [addingToCart, setAddingToCart] = useState(false); // Loading state for add-to-cart
+
+  // Fetch product details when the page loads or when ID changes
   useEffect(() => {
     loadProductById(id);
   }, [id, loadProductById]);
 
+  // Reset selected image and quantity when a new product is loaded
   useEffect(() => {
     if (currentProduct) {
       setSelectedImage(0);
@@ -28,6 +33,7 @@ const ProductDetailPage = () => {
     }
   }, [currentProduct]);
 
+  // Handle adding product to cart
   const handleAddToCart = async () => {
     if (!currentProduct || currentProduct.stock === 0) return;
 
@@ -35,10 +41,8 @@ const ProductDetailPage = () => {
     try {
       const success = addToCart(currentProduct, quantity);
       if (success) {
-        // Show success feedback
-        setTimeout(() => {
-          setAddingToCart(false);
-        }, 1000);
+        // Give feedback and reset adding state after a short delay
+        setTimeout(() => setAddingToCart(false), 1000);
       } else {
         setAddingToCart(false);
         alert('Cannot add more items. Stock limit reached.');
@@ -49,6 +53,7 @@ const ProductDetailPage = () => {
     }
   };
 
+  // Loading state
   if (loading) {
     return (
       <div className="page-container">
@@ -57,6 +62,7 @@ const ProductDetailPage = () => {
     );
   }
 
+  // Error state
   if (error) {
     return (
       <div className="page-container">
@@ -68,6 +74,7 @@ const ProductDetailPage = () => {
     );
   }
 
+  // If product not found
   if (!currentProduct) {
     return (
       <div className="page-container">
@@ -80,6 +87,7 @@ const ProductDetailPage = () => {
     );
   }
 
+  // Prepare product data
   const discountedPriceINR = calculateDiscountedPrice(currentProduct.price, currentProduct.discountPercentage);
   const originalPriceINR = calculateDiscountedPrice(currentProduct.price, 0);
   const stockStatus = getStockStatus(currentProduct.stock);
@@ -90,7 +98,8 @@ const ProductDetailPage = () => {
   return (
     <div className="product-detail-page">
       <div className="container">
-        {/* Breadcrumb */}
+
+        {/* Breadcrumb Navigation */}
         <nav className="breadcrumb">
           <Link to="/">Home</Link>
           <span>/</span>
@@ -100,7 +109,7 @@ const ProductDetailPage = () => {
         </nav>
 
         <div className="product-detail-content">
-          {/* Product Images */}
+          {/* Product Images Section */}
           <div className="product-images">
             <div className="main-image-container">
               <img 
@@ -108,6 +117,7 @@ const ProductDetailPage = () => {
                 alt={currentProduct.title}
                 className="main-image"
               />
+              {/* Show discount badge if applicable */}
               {currentProduct.discountPercentage > 0 && (
                 <div className="discount-badge">
                   -{Math.round(currentProduct.discountPercentage)}%
@@ -115,6 +125,7 @@ const ProductDetailPage = () => {
               )}
             </div>
 
+            {/* Thumbnail images for multiple product images */}
             {images.length > 1 && (
               <div className="image-thumbnails">
                 {images.map((image, index) => (
@@ -130,14 +141,14 @@ const ProductDetailPage = () => {
             )}
           </div>
 
-          {/* Product Info */}
+          {/* Product Info Section */}
           <div className="product-info">
             {currentProduct.brand && (
               <div className="product-brand">{currentProduct.brand}</div>
             )}
-
             <h1 className="product-title">{currentProduct.title}</h1>
 
+            {/* Rating */}
             <div className="product-rating">
               <StarRating rating={currentProduct.rating} size="large" />
               <span className="rating-text">
@@ -145,6 +156,7 @@ const ProductDetailPage = () => {
               </span>
             </div>
 
+            {/* Pricing */}
             <div className="product-pricing">
               <div className="price-container">
                 <span className="current-price">{formatPrice(currentProduct.price)}</span>
@@ -161,6 +173,7 @@ const ProductDetailPage = () => {
               )}
             </div>
 
+            {/* Stock Info */}
             <div className={`stock-status ${stockStatus.class}`}>
               {stockStatus.text}
               {currentProduct.stock > 0 && currentProduct.stock <= 10 && (
@@ -168,11 +181,13 @@ const ProductDetailPage = () => {
               )}
             </div>
 
+            {/* Product Description */}
             <div className="product-description">
               <h3>Description</h3>
               <p>{currentProduct.description}</p>
             </div>
 
+            {/* Additional Product Details */}
             <div className="product-details">
               <h3>Product Details</h3>
               <div className="details-grid">
@@ -207,7 +222,9 @@ const ProductDetailPage = () => {
               </div>
             </div>
 
+            {/* Purchase Section */}
             <div className="purchase-section">
+              {/* Quantity Selector */}
               {!inCart && currentProduct.stock > 0 && (
                 <div className="quantity-selector">
                   <label htmlFor="quantity">Quantity:</label>
@@ -224,6 +241,7 @@ const ProductDetailPage = () => {
                 </div>
               )}
 
+              {/* Add to Cart Button */}
               <button
                 className={`add-to-cart-btn ${addingToCart ? 'adding' : ''} ${inCart ? 'in-cart' : ''}`}
                 onClick={handleAddToCart}
@@ -235,6 +253,7 @@ const ProductDetailPage = () => {
                  'Add to Cart'}
               </button>
 
+              {/* View Cart Link if item already in cart */}
               {inCart && (
                 <Link to="/cart" className="view-cart-btn">
                   View Cart

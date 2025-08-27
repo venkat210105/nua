@@ -1,8 +1,13 @@
 // Utility functions for the React e-commerce app
 
-// Currency conversion rate (updated as of August 2025)
+// Conversion rate from USD to INR (updated August 2025)
 const USD_TO_INR = 83.12;
 
+/**
+ * Debounce function: limits how often a function can run
+ * @param {Function} func - Function to debounce
+ * @param {number} wait - Delay in milliseconds
+ */
 export const debounce = (func, wait) => {
   let timeout;
   return function executedFunction(...args) {
@@ -15,6 +20,10 @@ export const debounce = (func, wait) => {
   };
 };
 
+/**
+ * Convert price in USD to INR and format it
+ * @param {number|string} priceInUSD
+ */
 export const formatPrice = (priceInUSD) => {
   const numPrice = parseFloat(priceInUSD) || 0;
   const priceInINR = numPrice * USD_TO_INR;
@@ -27,18 +36,18 @@ export const formatPrice = (priceInUSD) => {
   }).format(priceInINR);
 };
 
+/**
+ * Format category names to a readable string
+ * e.g., "mens-shoes" → "Men's Shoes"
+ * @param {string} category
+ */
 export const formatCategoryName = (category) => {
-  // Robust category name formatting with type checking
-  if (!category || typeof category !== 'string') {
-    return 'Uncategorized';
-  }
+  if (!category || typeof category !== 'string') return 'Uncategorized';
 
   try {
-    // Handle categories like "mens-shoes", "womens-bags", etc.
     return category
       .split('-')
       .map(word => {
-        // Special handling for common prefixes
         if (word === 'mens') return "Men's";
         if (word === 'womens') return "Women's";
         return word.charAt(0).toUpperCase() + word.slice(1);
@@ -50,6 +59,11 @@ export const formatCategoryName = (category) => {
   }
 };
 
+/**
+ * Calculate discounted price in INR
+ * @param {number} priceInUSD
+ * @param {number} discountPercentage
+ */
 export const calculateDiscountedPrice = (priceInUSD, discountPercentage) => {
   const numPrice = parseFloat(priceInUSD) || 0;
   const numDiscount = parseFloat(discountPercentage) || 0;
@@ -60,6 +74,10 @@ export const calculateDiscountedPrice = (priceInUSD, discountPercentage) => {
     : priceInINR;
 };
 
+/**
+ * Get stock status based on quantity
+ * @param {number} stock
+ */
 export const getStockStatus = (stock) => {
   const numStock = parseInt(stock) || 0;
 
@@ -68,23 +86,39 @@ export const getStockStatus = (stock) => {
   return { class: 'in-stock', text: 'In Stock' };
 };
 
+/**
+ * Validate email address
+ * @param {string} email
+ */
 export const validateEmail = (email) => {
   if (!email || typeof email !== 'string') return false;
   const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return regex.test(email);
 };
 
+/**
+ * Validate Indian PIN code (6 digits, first digit != 0)
+ * @param {string} pinCode
+ */
 export const validatePinCode = (pinCode) => {
   if (!pinCode || typeof pinCode !== 'string') return false;
-  // Indian PIN codes are exactly 6 digits, first digit can't be 0
   const regex = /^[1-9][0-9]{5}$/;
   return regex.test(pinCode);
 };
 
+/**
+ * Generate unique order number (last 8 digits of timestamp)
+ */
 export const generateOrderNumber = () => {
   return 'SH' + Date.now().toString().slice(-8);
 };
 
+/**
+ * Safely access nested object property
+ * @param {Object} obj
+ * @param {string} path - e.g., "user.address.city"
+ * @param {any} defaultValue
+ */
 export const safelyAccessProperty = (obj, path, defaultValue = null) => {
   try {
     return path.split('.').reduce((current, key) => {
@@ -96,15 +130,24 @@ export const safelyAccessProperty = (obj, path, defaultValue = null) => {
   }
 };
 
+/**
+ * Check if value is a valid number
+ */
 export const isValidNumber = (value) => {
   return !isNaN(parseFloat(value)) && isFinite(value);
 };
 
+/**
+ * Sanitize a string value, fallback if invalid
+ */
 export const sanitizeString = (str, fallback = '') => {
   return (str && typeof str === 'string') ? str : fallback;
 };
 
-// Category-specific utilities
+/**
+ * Map category code to display name
+ * Fallback to formatCategoryName if unknown
+ */
 export const getCategoryDisplayName = (category) => {
   const categoryMap = {
     'beauty': 'Beauty',
@@ -136,12 +179,16 @@ export const getCategoryDisplayName = (category) => {
   return categoryMap[category] || formatCategoryName(category);
 };
 
-// Utility to get current exchange rate
+/**
+ * Get current USD to INR exchange rate
+ */
 export const getCurrentExchangeRate = () => {
   return USD_TO_INR;
 };
 
-// Utility to format price with original USD value shown
+/**
+ * Format price with both INR and USD
+ */
 export const formatPriceWithUSD = (priceInUSD) => {
   const numPrice = parseFloat(priceInUSD) || 0;
   const priceInINR = numPrice * USD_TO_INR;
@@ -160,27 +207,29 @@ export const formatPriceWithUSD = (priceInUSD) => {
   return `${formattedINR} (${formattedUSD})`;
 };
 
-// Format Indian phone number
+/**
+ * Format Indian mobile number: +91 XXXXX XXXXX
+ */
 export const formatIndianPhoneNumber = (phone) => {
   if (!phone || typeof phone !== 'string') return '';
-  // Remove all non-digits
   const cleaned = phone.replace(/\D/g, '');
-
-  // Check if it's a valid Indian mobile number (10 digits starting with 6-9)
   if (cleaned.length === 10 && /^[6-9]/.test(cleaned)) {
     return `+91 ${cleaned.substring(0, 5)} ${cleaned.substring(5)}`;
   }
-
-  return phone; // Return original if not valid
+  return phone;
 };
 
-// Calculate tax for Indian context (18% GST)
+/**
+ * Calculate GST for a given amount (default 18%)
+ */
 export const calculateGST = (amount, gstRate = 0.18) => {
   const numAmount = parseFloat(amount) || 0;
   return numAmount * gstRate;
 };
 
-// Format address for Indian context
+/**
+ * Format Indian address object into a single string
+ */
 export const formatIndianAddress = (address) => {
   if (!address) return '';
   const { street, city, state, pinCode } = address;

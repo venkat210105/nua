@@ -1,8 +1,10 @@
 import React, { createContext, useContext, useReducer, useCallback } from 'react';
 import { fetchProducts, fetchProductById, fetchCategories, fetchProductsByCategory } from '../services/apiService';
 
+// Create context for products
 const ProductContext = createContext();
 
+// Reducer to manage product-related state
 const productReducer = (state, action) => {
   switch (action.type) {
     case 'SET_LOADING':
@@ -43,6 +45,7 @@ const productReducer = (state, action) => {
   }
 };
 
+// Initial state for product context
 const initialState = {
   products: [],
   filteredProducts: [],
@@ -57,7 +60,7 @@ const initialState = {
 export const ProductProvider = ({ children }) => {
   const [state, dispatch] = useReducer(productReducer, initialState);
 
-  // Load all products (global)
+  // Load all products
   const loadProducts = useCallback(async () => {
     dispatch({ type: 'SET_LOADING', payload: true });
     try {
@@ -77,7 +80,7 @@ export const ProductProvider = ({ children }) => {
       const validCategories = categories.filter(cat => typeof cat === 'string' && cat.trim() !== '');
       dispatch({ type: 'SET_CATEGORIES', payload: validCategories });
     } catch (error) {
-      // Fallback categories
+      // Provide fallback categories if API fails
       const fallbackCategories = [
         'beauty', 'fragrances', 'furniture', 'groceries', 'home-decoration',
         'kitchen-accessories', 'laptops', 'mens-shirts', 'mens-shoes', 
@@ -90,7 +93,7 @@ export const ProductProvider = ({ children }) => {
     }
   }, []);
 
-  // Load product by ID
+  // Load single product by ID
   const loadProductById = useCallback(async (id) => {
     dispatch({ type: 'SET_LOADING', payload: true });
     try {
@@ -101,17 +104,15 @@ export const ProductProvider = ({ children }) => {
     }
   }, []);
 
-  // Filter by category with dynamic fetch
+  // Filter products by category
   const filterByCategory = useCallback(async (category) => {
     dispatch({ type: 'SET_SELECTED_CATEGORY', payload: category });
     dispatch({ type: 'SET_LOADING', payload: true });
 
     try {
       if (!category || category === 'all') {
-        // Show global products
         dispatch({ type: 'SET_FILTERED_PRODUCTS', payload: state.products });
       } else {
-        // Fetch products for the selected category
         const data = await fetchProductsByCategory(category);
         const productsInCategory = data?.products || [];
         dispatch({ type: 'SET_FILTERED_PRODUCTS', payload: productsInCategory });
@@ -123,7 +124,7 @@ export const ProductProvider = ({ children }) => {
     }
   }, [state.products]);
 
-  // Search products
+  // Search products by title and optionally filter by category
   const searchProducts = useCallback((query) => {
     dispatch({ type: 'SET_SEARCH_QUERY', payload: query });
     let filtered = [...state.products];
@@ -133,7 +134,6 @@ export const ProductProvider = ({ children }) => {
       filtered = filtered.filter(p => p.title.toLowerCase().includes(lowerQuery));
     }
 
-    // Apply category filter if selected
     if (state.selectedCategory && state.selectedCategory !== 'all') {
       filtered = filtered.filter(p => p.category === state.selectedCategory);
     }
@@ -141,7 +141,7 @@ export const ProductProvider = ({ children }) => {
     dispatch({ type: 'SET_FILTERED_PRODUCTS', payload: filtered });
   }, [state.products, state.selectedCategory]);
 
-  // Sort products
+  // Sort filtered products
   const sortProducts = useCallback((sortBy) => {
     const sorted = [...(state.filteredProducts || [])];
 
@@ -168,10 +168,9 @@ export const ProductProvider = ({ children }) => {
     dispatch({ type: 'SET_FILTERED_PRODUCTS', payload: sorted });
   }, [state.filteredProducts]);
 
-  const clearError = useCallback(() => {
-    dispatch({ type: 'CLEAR_ERROR' });
-  }, []);
+  const clearError = useCallback(() => dispatch({ type: 'CLEAR_ERROR' }), []);
 
+  // Expose state and actions
   const value = {
     ...state,
     loadProducts,
@@ -190,6 +189,7 @@ export const ProductProvider = ({ children }) => {
   );
 };
 
+// Custom hook to consume product context
 export const useProducts = () => {
   const context = useContext(ProductContext);
   if (!context) throw new Error('useProducts must be used within a ProductProvider');

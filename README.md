@@ -4,7 +4,7 @@ Live Demo:
 
 Vercel Deployment
 
-Render Deployment
+https://nua1.vercel.app/checkout
 
 Project Overview
 

@@ -1,171 +1,154 @@
-NuaCart – Mini E-Commerce React App
+NuaCart – Mini E-Commerce Application
 
-Live Demo:
 
-Vercel Deployment
-
-https://nua1.vercel.app/checkout
-
+GitHub Repo
+A React-based mini e-commerce SPA consuming the DummyJSON API to display products, manage a shopping cart, and perform checkout. Developed as part of the SDE Developer Intern assignment with additional bonus enhancements.
+________________________________________
+Table of Contents
+1.	Project Overview
+2.	Tech Stack
+3.	Functional Features
+4.	Bonus Enhancements
+5.	Folder Structure
+6.	Setup & Run
+7.	Screenshots
+8.	Live Demo
+9.	Future Enhancements
+________________________________________
 Project Overview
-
-NuaCart is a fully functional mini e-commerce application built with React. It consumes a public e-commerce API and implements a modern single-page application (SPA) structure with routing, global state management, and responsive design.
-
-The project includes complete shopping cart functionality, checkout flow, search and filter options, and handles loading states, errors, and edge cases effectively.
-
-Features
-Core Features
-
-Product Listing (/)
-
-Responsive grid layout displaying products (image, title, price).
-
-Search by product title with debounced input.
-
-Filter products by category.
-
-Featured products section (bonus enhancement).
-
-Loading and error handling with LoadingSpinner and ErrorMessage.
-
-Product Detail (/product/:id)
-
-Detailed product view: images, title, description, price, rating.
-
-Add to cart with quantity selector (1–5).
-
-Shopping Cart (/cart)
-
-List of added items: thumbnail, title, unit price, quantity selector (1–10), subtotal.
-
-Remove items and update quantity dynamically.
-
-Grand total, GST calculation, and "Proceed to Checkout" button.
-
-Checkout (/checkout)
-
-Order summary with all items and totals.
-
-Simple form: name, email, address with validation (email, PIN code).
-
-Placing an order clears the cart and shows a confirmation message.
-
-State Management
-
-CartContext and ProductContext manage global application state.
-
-Cart persists in localStorage.
-
-Search, category filter, and sort functionalities implemented in the context.
-
-Data Caching
-
-Product lists and details cached in memory and localStorage to reduce API calls.
-
-Bonus Enhancements
-
-Featured products section on the homepage.
-
-Price formatting with USD → INR conversion and discount display.
-
-Stock status indicators (In Stock / Low Stock / Out of Stock).
-
-Rating component with full, half, and empty stars.
-
-Responsive mobile navigation menu with toggle.
-
-Hosted on Vercel and Render.
-
-Polished UI/UX with reusable components.
-
-Project Structure
+NuaCart is a modern single-page e-commerce application (SPA) built with React. It allows users to:
+•	Browse products fetched from the DummyJSON live API.
+•	Search for products and filter by category.
+•	View detailed product information.
+•	Add products to a shopping cart and manage quantities.
+•	Checkout with a simple order form.
+•	Persist cart state using localStorage.
+The app emphasizes clean component hierarchy, responsive design, error handling, and efficient global state management with React Context.
+________________________________________
+Tech Stack
+•	Frontend: React.js, React Router DOM
+•	State Management: React Context API (CartContext and ProductContext)
+•	Styling: CSS (modular per component)
+•	API: DummyJSON API
+•	Deployment: Vercel (frontend) / Render (optional backend if needed)
+•	Tools: VS Code, Git, GitHub, Node.js, npm
+________________________________________
+Functional Features
+1. Product Listing (/)
+•	Displays all products in a responsive grid.
+•	Each product card shows: image, title, brand, price, rating, discount badge, stock status.
+•	Provides search (by product title) and category filter.
+•	Handles loading states and fetch errors gracefully.
+2. Product Detail (/product/:id)
+•	Displays full product details: image(s), title, description, price, rating.
+•	Allows Add to Cart with quantity selector (1–5).
+•	Shows stock availability and discounted price.
+3. Shopping Cart (/cart)
+•	Lists all added items with thumbnail, title, price, quantity selector (1–10), and subtotal.
+•	Allows quantity updates and item removal.
+•	Displays grand total and a Proceed to Checkout button.
+4. Checkout (/checkout)
+•	Shows order summary with items and total.
+•	Simple form to collect name, email, and address with validation.
+•	Place Order clears the cart and shows confirmation.
+5. State & Data Management
+•	Global state with React Context (CartContext, ProductContext).
+•	Caching: Products and cart are persisted in localStorage to avoid redundant fetches.
+•	Error handling: Components show meaningful messages and retry options.
+•	Debounced search for optimized performance.
+________________________________________
+Bonus Enhancements (beyond assignment)
+•	Featured products section on homepage.
+•	Display discount badges and stock status on product cards.
+•	Show rating stars visually with half-stars.
+•	Debounced live search for better UX.
+•	Cart quantity limits enforced dynamically.
+•	Fully responsive design for mobile and desktop.
+•	Hosted on Vercel with live URL.
+•	Clear, modular component structure for reusability.
+•	Local caching of API responses to reduce network calls.
+________________________________________
+Folder Structure
 public/
-    ├── favicon.ico
-    ├── index.html
-    └── manifest.json
+├── favicon.ico
+├── index.html
+└── manifest.json
+
 src/
-    ├── components/
-        └── common/             # Reusable UI components
-    ├── context/                # Global state (Cart & Product)
-    ├── pages/                  # Individual page components
-    ├── services/               # API service functions
-    ├── utils/                  # Helper functions (formatting, discount, GST)
-    ├── App.js                  # Main app with routing
-    ├── index.js                # App entry point
-    └── *.css                   # Styling files
+├── components/
+│   └── common/
+│       ├── ErrorMessage.css
+│       ├── ErrorMessage.js
+│       ├── LoadingSpinner.css
+│       ├── LoadingSpinner.js
+│       ├── NavigationHeader.css
+│       ├── NavigationHeader.js
+│       ├── ProductCard.css
+│       ├── ProductCard.js
+│       ├── StarRating.css
+│       └── StarRating.js
+├── context/
+│   ├── CartContext.js
+│   └── ProductContext.js
+├── pages/
+│   ├── CheckoutPage.css
+│   ├── CheckoutPage.js
+│   ├── HomePage.css
+│   ├── HomePage.js
+│   ├── ProductDetailPage.css
+│   ├── ProductDetailPage.js
+│   ├── ShoppingCartPage.css
+│   └── ShoppingCartPage.js
+├── services/
+│   └── apiService.js
+├── utils/
+│   └── helpers.js
+├── App.css
+├── App.js
+├── index.css
+└── index.js
+
 _redirects
 .gitignore
-package.json
 package-lock.json
+package.json
 README.md
-
-Tech Stack
-
-Frontend: React, React Router
-
-State Management: Context API
-
-API: Public e-commerce API (Fake Store API or similar)
-
-Hosting: Vercel & Render
-
-Styling: CSS modules, responsive design
-
+________________________________________
 Setup & Run
+# Clone the repository
+git clone https://github.com/venkat210105/nua.git
 
-Clone the repository:
+# Navigate to project
+cd nua
 
-git clone https://github.com/your-username/nuacart.git
-cd nuacart
-
-
-Install dependencies:
-
+# Install dependencies
 npm install
 
-
-Run the development server:
-
+# Start development server
 npm start
-
-
-Open http://localhost:3000
- in your browser.
-
-Design Decisions & Trade-offs
-
-Used Context API instead of Redux for simplicity and faster setup.
-
-Cart persisted in localStorage to maintain state across reloads.
-
-Debounced search implemented for better performance on large datasets.
-
-Basic checkout form validation implemented; no real payment integration.
-
-Featured products and bonus UI enhancements added to improve UX.
-
-Future Improvements
-
-Implement full authentication and user profiles.
-
-Integrate payment gateway for real checkout.
-
-Add pagination and infinite scrolling for product lists.
-
-Unit and integration tests for components and contexts.
-
-![NuaCart Screenshot](https://github.com/user-attachments/assets/229bfb81-80b2-4b8b-8c4f-83c03b43d6f1)
-
-<img width="1763" height="870" alt="image" src="https://github.com/user-attachments/assets/1e76cf1b-8943-4a1d-a273-1d9ade68220a" />
-![Cart](https://github.com/user-attachments/assets/1e76cf1b-8943-4a1d-a273-1d9ade68220a)
-
-![Cart](https://github.com/user-attachments/assets/8f0d20b1-23b7-4221-8459-30ae27c7afcc)
-
-
-
-![Check out Screenshot](https://github.com/user-attachments/assets/d40001e8-a0c1-423b-9f43-4ba1df0029a8)
-
-![Confirmation Page Screenshot](https://github.com/user-attachments/assets/2c96f6c7-a63e-446e-a02e-c7dd54188392)
-
-
-
+The app will run at http://localhost:3000.
+________________________________________
+Screenshots
+Home Page – Product Listing
+ 
+Product Detail Page
+ 
+Shopping Cart Page
+ 
+Checkout Page
+ 
+Mobile Responsive View
+ 
+________________________________________
+Live Demo
+•	Vercel: nua care your E-Commerce Store
+https://nua-z9ys.vercel.app/
+•	GitHub Repo: https://github.com/venkat210105/nua.git
+________________________________________
+Future Enhancements
+•	Add user authentication for personalized carts.
+•	Integrate payment gateway for real checkout.
+•	Implement reviews and ratings for products.
+•	Add wishlist feature.
+•	Include pagination and advanced sorting/filtering.
 
